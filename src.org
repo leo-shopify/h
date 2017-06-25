@@ -64,6 +64,9 @@ needed:
   }
 #+end_src
 
+*** Note
+For demo purposes this implementation is enough, but the case of ~typeof node
+=== 'string'~ should be replaced with a more robust implementation, like [[https://github.com/KoryNunn/crel][crel]].
 
 
 ** Setup
