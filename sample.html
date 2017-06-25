@@ -1,0 +1,77 @@
+<!doctype html>
+<title>h</title>
+<body>
+  <script>
+    /** @jsx h */
+    
+    function h(node, attributes, ...children) {
+      if (typeof node === 'function') {
+        return node(attributes, ...children);
+      }
+    
+      if (typeof node !== 'string') {
+        throw new TypeError('Unknown node type');
+      }
+    
+      const elm = document.createElement(node);
+      let attr = attributes || {};
+      Object.keys(attr).forEach(k => elm.setAttribute(k, attr[k]));
+      return (children || []).reduce(rec, elm);
+    }
+    
+    function rec(acc, c) {
+      let ch = c; // FIXME(leo): assumes object is valid NODE
+      if (Array.isArray(c)) {
+        ch = c.reduce(rec, document.createDocumentFragment());
+      } else {
+        switch (typeof c) {
+          case 'string':
+          case 'number':
+          case 'boolean':
+            ch = document.createTextNode(c);
+            break;
+        }
+      }
+      acc.appendChild(ch);
+      return acc;
+    }
+    
+    function Title(attr, str) {
+      return h(
+        'h1',
+        null,
+        str.toUpperCase()
+      );
+    }
+    
+    function Author(attr, ...name) {
+      return h(
+        'a',
+        { href: `mailto:${attr.email}` },
+        name
+      );
+    }
+    
+    const body = h(
+      'header',
+      null,
+      h(
+        Title,
+        null,
+        'Santa Maradona'
+      ),
+      h(
+        Author,
+        { email: 'mano.negra@example.com' },
+        'Mano ',
+        h(
+          'strong',
+          null,
+          'Negra'
+        )
+      )
+    );
+    
+    document.body.appendChild(body);
+  </script>
+</body>

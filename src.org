@@ -1,0 +1,232 @@
+#+OPTIONS: toc:nil title:nil
+
+* jsx without react
+Even if react is not used in a project you can still take advantage of [[https://babeljs.io/docs/plugins/transform-react-jsx/][jsx]]
+syntax if you are using [[https://babeljs.io/][babel]].
+
+** Sample
+Fist we have to tell babel what function to use to compile jsx:
+#+name: h-header
+#+begin_src js
+  /** @jsx h */
+#+end_src
+
+Then we can start using jsx syntax and in this case output to DOM:
+#+name: sample-h-src
+#+begin_src js
+  function Title(attr, str) {
+    return <h1>{str.toUpperCase()}</h1>;
+  }
+
+  function Author(attr, ...name) {
+    return <a href={`mailto:${attr.email}`}>{name}</a>;
+  }
+
+  const body = (<header>
+                <Title>Santa Maradona</Title>
+                <Author email="mano.negra@example.com">Mano <strong>Negra</strong></Author>
+                </header>);
+
+  document.body.appendChild(body);
+#+end_src
+
+While babel can compile the script as is, a runtime definition of ~h~ is
+needed:
+#+name: define-h
+#+begin_src js
+  function h(node, attributes, ...children) {
+    if (typeof node === 'function') {
+      return node(attributes, ...children);
+    }
+
+    if (typeof node !== 'string') { throw new TypeError('Unknown node type'); }
+
+    const elm = document.createElement(node);
+    let attr = attributes || {};
+    Object.keys(attr).forEach(k => elm.setAttribute(k, attr[k]) );
+    return (children || []).reduce(rec, elm);
+  }
+
+  function rec(acc, c) {
+    let ch = c; // FIXME(leo): assumes object is valid NODE
+    if (Array.isArray(c)) { ch = c.reduce(rec, document.createDocumentFragment()); }
+    else {
+      switch (typeof c) {
+        case 'string':
+        case 'number':
+        case 'boolean':
+          ch = document.createTextNode(c);
+          break;
+      }
+    }
+    acc.appendChild(ch);
+    return acc;
+  }
+#+end_src
+
+
+
+** Setup
+Install [[https://nodejs.org/en/][nodejs]] if you don't have it already.
+In this document the versions used are:
+- [[https://nodejs.org/en/][nodejs]]: src_sh[:exports results]{node --version} {{{results(=v8.1.2=)}}}
+- [[https://www.npmjs.com/][npm]]: src_sh[:exports results]{npm --version} {{{results(=5.0.3=)}}}
+
+In an empty directory:
+1. Create an npm package:
+   #+begin_src sh
+     npm init --yes
+   #+end_src
+
+2. Create a directory for the source code:
+   #+begin_src sh
+     mkdir src
+   #+end_src
+
+3. Install babel:
+   #+begin_src sh
+     npm install --save-dev babel-cli
+   #+end_src
+
+4. Add a build script to =package.json=:
+   #+NAME: babel-cmd
+   #+begin_src sh :exports none
+     babel src -d lib
+   #+end_src
+
+   #+begin_src json :noweb yes
+     "scripts": {
+       "build": "<<babel-cmd>>"
+     }
+   #+end_src
+   #+begin_src js :exports none :noweb yes
+     /* eslint-env node */
+     const fs = require('fs');
+     const name = 'package.json';
+     const pj = JSON.parse(fs.readFileSync(name, 'utf8'));
+     pj.scripts.build = '<<babel-cmd>>';
+     pj.eslintConfig = {parserOptions: {ecmaVersion: 6, ecmaFeatures: {jsx: true}}};
+     fs.writeFileSync(name, JSON.stringify(pj, null, 2), 'utf8');
+   #+end_src
+
+5. Install /React JSX transform/:
+   #+begin_src sh
+     npm install --save-dev babel-plugin-transform-react-jsx
+   #+end_src
+
+6. Create =.babelrc= configuration file:
+   #+begin_src json :tangle .babelrc
+     {
+       "plugins": ["transform-react-jsx"]
+     }
+   #+end_src
+7. Save the sample scripts as =src/sample.js=.
+   #+begin_src js :tangle src/sample.js :noweb yes :exports none
+     <<h-header>>
+
+     <<define-h>>
+
+     <<sample-h-src>>
+   #+end_src
+8. Compile the script:
+   #+begin_src sh
+     npm run build
+   #+end_src
+
+
+** All together
+#+name: reader
+#+begin_src sh :exports result :results code :wrap "src javascript :exports none"
+  cat lib/sample.js
+#+end_src
+
+#+name: compiled
+#+RESULTS: reader
+#+BEGIN_src javascript :exports none
+/** @jsx h */
+
+function h(node, attributes, ...children) {
+  if (typeof node === 'function') {
+    return node(attributes, ...children);
+  }
+
+  if (typeof node !== 'string') {
+    throw new TypeError('Unknown node type');
+  }
+
+  const elm = document.createElement(node);
+  let attr = attributes || {};
+  Object.keys(attr).forEach(k => elm.setAttribute(k, attr[k]));
+  return (children || []).reduce(rec, elm);
+}
+
+function rec(acc, c) {
+  let ch = c; // FIXME(leo): assumes object is valid NODE
+  if (Array.isArray(c)) {
+    ch = c.reduce(rec, document.createDocumentFragment());
+  } else {
+    switch (typeof c) {
+      case 'string':
+      case 'number':
+      case 'boolean':
+        ch = document.createTextNode(c);
+        break;
+    }
+  }
+  acc.appendChild(ch);
+  return acc;
+}
+
+function Title(attr, str) {
+  return h(
+    'h1',
+    null,
+    str.toUpperCase()
+  );
+}
+
+function Author(attr, ...name) {
+  return h(
+    'a',
+    { href: `mailto:${attr.email}` },
+    name
+  );
+}
+
+const body = h(
+  'header',
+  null,
+  h(
+    Title,
+    null,
+    'Santa Maradona'
+  ),
+  h(
+    Author,
+    { email: 'mano.negra@example.com' },
+    'Mano ',
+    h(
+      'strong',
+      null,
+      'Negra'
+    )
+  )
+);
+
+document.body.appendChild(body);
+#+END_src
+
+#+begin_src html :tangle sample.html :noweb yes
+  <!doctype html>
+  <title>h</title>
+  <body>
+    <script>
+      <<compiled>>
+    </script>
+  </body>
+#+end_src
+
+Tested on:
+| Firefox 54 | ✅ |
+| Safari 10  | ✅ |
+| Chrome 59  | ✅ |

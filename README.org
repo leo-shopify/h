@@ -1,0 +1,206 @@
+# Created 2017-06-25 Sun 01:55
+#+OPTIONS: toc:nil title:nil
+#+AUTHOR: leonardo rojas
+
+* jsx without react
+Even if react is not used in a project you can still take advantage of [[https://babeljs.io/docs/plugins/transform-react-jsx/][jsx]]
+syntax if you are using [[https://babeljs.io/][babel]].
+
+** Sample
+Fist we have to tell babel what function to use to compile jsx:
+#+NAME: h-header
+#+BEGIN_SRC js
+  /** @jsx h */
+#+END_SRC
+
+Then we can start using jsx syntax and in this case output to DOM:
+#+NAME: sample-h-src
+#+BEGIN_SRC js
+  function Title(attr, str) {
+    return <h1>{str.toUpperCase()}</h1>;
+  }
+  
+  function Author(attr, ...name) {
+    return <a href={`mailto:${attr.email}`}>{name}</a>;
+  }
+  
+  const body = (<header>
+  	      <Title>Santa Maradona</Title>
+  	      <Author email="mano.negra@example.com">Mano <strong>Negra</strong></Author>
+  	      </header>);
+  
+  document.body.appendChild(body);
+#+END_SRC
+
+While babel can compile the script as is, a runtime definition of ~h~ is
+needed:
+#+NAME: define-h
+#+BEGIN_SRC js
+  function h(node, attributes, ...children) {
+    if (typeof node === 'function') {
+      return node(attributes, ...children);
+    }
+  
+    if (typeof node !== 'string') { throw new TypeError('Unknown node type'); }
+  
+    const elm = document.createElement(node);
+    let attr = attributes || {};
+    Object.keys(attr).forEach(k => elm.setAttribute(k, attr[k]) );
+    return (children || []).reduce(rec, elm);
+  }
+  
+  function rec(acc, c) {
+    let ch = c; // FIXME(leo): assumes object is valid NODE
+    if (Array.isArray(c)) { ch = c.reduce(rec, document.createDocumentFragment()); }
+    else {
+      switch (typeof c) {
+        case 'string':
+        case 'number':
+        case 'boolean':
+  	ch = document.createTextNode(c);
+  	break;
+      }
+    }
+    acc.appendChild(ch);
+    return acc;
+  }
+#+END_SRC
+
+
+
+** Setup
+Install [[https://nodejs.org/en/][nodejs]] if you don't have it already.
+In this document the versions used are:
+- [[https://nodejs.org/en/][nodejs]]: =v8.1.2=
+- [[https://www.npmjs.com/][npm]]: =5.0.3=
+
+In an empty directory:
+1. Create an npm package:
+   #+BEGIN_SRC sh
+     npm init --yes
+   #+END_SRC
+
+2. Create a directory for the source code:
+   #+BEGIN_SRC sh
+     mkdir src
+   #+END_SRC
+
+3. Install babel:
+   #+BEGIN_SRC sh
+     npm install --save-dev babel-cli
+   #+END_SRC
+
+4. Add a build script to =package.json=:
+   #+BEGIN_SRC json
+     "scripts": {
+       "build": "babel src -d lib"
+     }
+   #+END_SRC
+5. Install /React JSX transform/:
+   #+BEGIN_SRC sh
+     npm install --save-dev babel-plugin-transform-react-jsx
+   #+END_SRC
+
+6. Create =.babelrc= configuration file:
+   #+BEGIN_SRC json
+     {
+       "plugins": ["transform-react-jsx"]
+     }
+   #+END_SRC
+7. Save the sample scripts as =src/sample.js=.
+8. Compile the script:
+   #+BEGIN_SRC sh
+     npm run build
+   #+END_SRC
+
+
+** All together
+#+NAME: reader
+#+BEGIN_SRC sh :exports result :results code :wrap "src javascript :exports none"
+  cat lib/sample.js
+#+END_SRC
+
+#+BEGIN_SRC html
+  <!doctype html>
+  <title>h</title>
+  <body>
+    <script>
+      /** @jsx h */
+  
+      function h(node, attributes, ...children) {
+        if (typeof node === 'function') {
+  	return node(attributes, ...children);
+        }
+  
+        if (typeof node !== 'string') {
+  	throw new TypeError('Unknown node type');
+        }
+  
+        const elm = document.createElement(node);
+        let attr = attributes || {};
+        Object.keys(attr).forEach(k => elm.setAttribute(k, attr[k]));
+        return (children || []).reduce(rec, elm);
+      }
+  
+      function rec(acc, c) {
+        let ch = c; // FIXME(leo): assumes object is valid NODE
+        if (Array.isArray(c)) {
+  	ch = c.reduce(rec, document.createDocumentFragment());
+        } else {
+  	switch (typeof c) {
+  	  case 'string':
+  	  case 'number':
+  	  case 'boolean':
+  	    ch = document.createTextNode(c);
+  	    break;
+  	}
+        }
+        acc.appendChild(ch);
+        return acc;
+      }
+  
+      function Title(attr, str) {
+        return h(
+  	'h1',
+  	null,
+  	str.toUpperCase()
+        );
+      }
+  
+      function Author(attr, ...name) {
+        return h(
+  	'a',
+  	{ href: `mailto:${attr.email}` },
+  	name
+        );
+      }
+  
+      const body = h(
+        'header',
+        null,
+        h(
+  	Title,
+  	null,
+  	'Santa Maradona'
+        ),
+        h(
+  	Author,
+  	{ email: 'mano.negra@example.com' },
+  	'Mano ',
+  	h(
+  	  'strong',
+  	  null,
+  	  'Negra'
+  	)
+        )
+      );
+  
+      document.body.appendChild(body);
+    </script>
+  </body>
+#+END_SRC
+
+Tested on:
+| Firefox 54 | ✅ |
+| Safari 10  | ✅ |
+| Chrome 59  | ✅ |
