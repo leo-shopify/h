@@ -9,28 +9,30 @@
         return node(attributes, ...children);
       }
     
-      if (typeof node !== 'string') {
+      let elm;
+      if (typeof node === 'string') {
+        elm = document.createElement(node);
+      } else if (node.nodeType) {
+        elm = node;
+      } else {
         throw new TypeError('Unknown node type');
       }
     
-      const elm = document.createElement(node);
-      let attr = attributes || {};
-      Object.keys(attr).forEach(k => elm.setAttribute(k, attr[k]));
-      return (children || []).reduce(rec, elm);
+      if (Boolean(attributes)) {
+        Object.keys(attributes).forEach(k => elm.setAttribute(k, attributes[k]));
+      }
+    
+      return children.reduce(rec, elm);
     }
     
     function rec(acc, c) {
-      let ch = c; // FIXME(leo): assumes object is valid NODE
+      let ch;
       if (Array.isArray(c)) {
         ch = c.reduce(rec, document.createDocumentFragment());
+      } else if (c.nodeType) {
+        ch = c;
       } else {
-        switch (typeof c) {
-          case 'string':
-          case 'number':
-          case 'boolean':
-            ch = document.createTextNode(c);
-            break;
-        }
+        ch = document.createTextNode(c);
       }
       acc.appendChild(ch);
       return acc;

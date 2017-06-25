@@ -1,4 +1,4 @@
-# Created 2017-06-25 Sun 12:34
+# Created 2017-06-25 Sun 13:32
 #+OPTIONS: toc:nil title:nil
 #+AUTHOR: leonardo rojas
 
@@ -19,16 +19,16 @@ Then we can start using jsx syntax and in this case output to DOM:
   function Title(attr, str) {
     return <h1>{str.toUpperCase()}</h1>;
   }
-
+  
   function Author(attr, ...name) {
     return <a href={`mailto:${attr.email}`}>{name}</a>;
   }
-
+  
   const body = (<header>
   	      <Title>Santa Maradona</Title>
   	      <Author email="mano.negra@example.com">Mano <strong>Negra</strong></Author>
   	      </header>);
-
+  
   document.body.appendChild(body);
 #+END_SRC
 
@@ -40,35 +40,28 @@ needed:
     if (typeof node === 'function') {
       return node(attributes, ...children);
     }
-
-    if (typeof node !== 'string') { throw new TypeError('Unknown node type'); }
-
-    const elm = document.createElement(node);
-    let attr = attributes || {};
-    Object.keys(attr).forEach(k => elm.setAttribute(k, attr[k]) );
-    return (children || []).reduce(rec, elm);
-  }
-
-  function rec(acc, c) {
-    let ch = c; // FIXME(leo): assumes object is valid NODE
-    if (Array.isArray(c)) { ch = c.reduce(rec, document.createDocumentFragment()); }
-    else {
-      switch (typeof c) {
-        case 'string':
-        case 'number':
-        case 'boolean':
-  	ch = document.createTextNode(c);
-  	break;
-      }
+  
+    let elm;
+    if (typeof node === 'string') { elm = document.createElement(node); }
+    else if (node.nodeType) { elm = node; }
+    else { throw new TypeError('Unknown node type'); }
+  
+    if (Boolean(attributes)) {
+      Object.keys(attributes).forEach(k => elm.setAttribute(k, attributes[k]) );
     }
+  
+    return children.reduce(rec, elm);
+  }
+  
+  function rec(acc, c) {
+    let ch;
+    if (Array.isArray(c)) { ch = c.reduce(rec, document.createDocumentFragment()); }
+    else if (c.nodeType) { ch = c; }
+    else { ch = document.createTextNode(c); }
     acc.appendChild(ch);
     return acc;
   }
 #+END_SRC
-
-*** Note
-For demo purposes this implementation is enough, but the case of ~typeof node
-=== 'string'~ should be replaced with a more robust implementation, like [[https://github.com/KoryNunn/crel][crel]].
 
 
 ** Setup
@@ -129,39 +122,41 @@ In an empty directory:
   <body>
     <script>
       /** @jsx h */
-
+  
       function h(node, attributes, ...children) {
         if (typeof node === 'function') {
   	return node(attributes, ...children);
         }
-
-        if (typeof node !== 'string') {
+  
+        let elm;
+        if (typeof node === 'string') {
+  	elm = document.createElement(node);
+        } else if (node.nodeType) {
+  	elm = node;
+        } else {
   	throw new TypeError('Unknown node type');
         }
-
-        const elm = document.createElement(node);
-        let attr = attributes || {};
-        Object.keys(attr).forEach(k => elm.setAttribute(k, attr[k]));
-        return (children || []).reduce(rec, elm);
+  
+        if (Boolean(attributes)) {
+  	Object.keys(attributes).forEach(k => elm.setAttribute(k, attributes[k]));
+        }
+  
+        return children.reduce(rec, elm);
       }
-
+  
       function rec(acc, c) {
-        let ch = c; // FIXME(leo): assumes object is valid NODE
+        let ch;
         if (Array.isArray(c)) {
   	ch = c.reduce(rec, document.createDocumentFragment());
+        } else if (c.nodeType) {
+  	ch = c;
         } else {
-  	switch (typeof c) {
-  	  case 'string':
-  	  case 'number':
-  	  case 'boolean':
-  	    ch = document.createTextNode(c);
-  	    break;
-  	}
+  	ch = document.createTextNode(c);
         }
         acc.appendChild(ch);
         return acc;
       }
-
+  
       function Title(attr, str) {
         return h(
   	'h1',
@@ -169,7 +164,7 @@ In an empty directory:
   	str.toUpperCase()
         );
       }
-
+  
       function Author(attr, ...name) {
         return h(
   	'a',
@@ -177,7 +172,7 @@ In an empty directory:
   	name
         );
       }
-
+  
       const body = h(
         'header',
         null,
@@ -197,13 +192,13 @@ In an empty directory:
   	)
         )
       );
-
+  
       document.body.appendChild(body);
     </script>
   </body>
 #+END_SRC
 
-Tested on:
+*** Tested on
 | Firefox 54 | ✅ |
 | Safari 10  | ✅ |
 | Chrome 59  | ✅ |
