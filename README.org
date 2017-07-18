@@ -1,4 +1,4 @@
-# Created 2017-06-25 Sun 13:32
+# Created 2017-07-17 Mon 23:39
 #+OPTIONS: toc:nil title:nil
 #+AUTHOR: leonardo rojas
 
@@ -41,25 +41,32 @@ needed:
       return node(attributes, ...children);
     }
   
-    let elm;
-    if (typeof node === 'string') { elm = document.createElement(node); }
-    else if (node.nodeType) { elm = node; }
-    else { throw new TypeError('Unknown node type'); }
+    let element;
   
-    if (Boolean(attributes)) {
-      Object.keys(attributes).forEach(k => elm.setAttribute(k, attributes[k]) );
+    if (typeof node === 'string') {
+      element = document.createElement(node);
+    } else if (typeof node.appendChild === 'function') {
+      element = node;
+    } else {
+      throw new TypeError('node must be a String or an object that implements appendChild');
     }
   
-    return children.reduce(rec, elm);
+    if (attributes) {
+      Object.keys(attributes).forEach(k => k === '$'
+  				    ? Object.assign(element, attributes.$)
+  				    : element.setAttribute(k, attributes[k]) );
+    }
+  
+    return children == null ? element : children.reduce(recurse, element);
   }
   
-  function rec(acc, c) {
-    let ch;
-    if (Array.isArray(c)) { ch = c.reduce(rec, document.createDocumentFragment()); }
-    else if (c.nodeType) { ch = c; }
-    else { ch = document.createTextNode(c); }
-    acc.appendChild(ch);
-    return acc;
+  function recurse(node, item) {
+    let child;
+    if (Array.isArray(item)) { child = item.reduce(recurse, document.createDocumentFragment()); }
+    else if (item.nodeType) { child = item; }
+    else { child = document.createTextNode(item); }
+    node.appendChild(child);
+    return node;
   }
 #+END_SRC
 
@@ -67,8 +74,8 @@ needed:
 ** Setup
 Install [[https://nodejs.org/en/][nodejs]] if you don't have it already.
 In this document the versions used are:
-- [[https://nodejs.org/en/][nodejs]]: =v8.1.2=
-- [[https://www.npmjs.com/][npm]]: =5.0.3=
+- [[https://nodejs.org/en/][nodejs]]: =v8.1.4=
+- [[https://www.npmjs.com/][npm]]: =5.3.0=
 
 In an empty directory:
 1. Create an npm package:
@@ -128,33 +135,34 @@ In an empty directory:
   	return node(attributes, ...children);
         }
   
-        let elm;
+        let element;
+  
         if (typeof node === 'string') {
-  	elm = document.createElement(node);
-        } else if (node.nodeType) {
-  	elm = node;
+  	element = document.createElement(node);
+        } else if (typeof node.appendChild === 'function') {
+  	element = node;
         } else {
-  	throw new TypeError('Unknown node type');
+  	throw new TypeError('node must be a String or an object that implements appendChild');
         }
   
-        if (Boolean(attributes)) {
-  	Object.keys(attributes).forEach(k => elm.setAttribute(k, attributes[k]));
+        if (attributes) {
+  	Object.keys(attributes).forEach(k => k === '$' ? Object.assign(element, attributes.$) : element.setAttribute(k, attributes[k]));
         }
   
-        return children.reduce(rec, elm);
+        return children == null ? element : children.reduce(recurse, element);
       }
   
-      function rec(acc, c) {
-        let ch;
-        if (Array.isArray(c)) {
-  	ch = c.reduce(rec, document.createDocumentFragment());
-        } else if (c.nodeType) {
-  	ch = c;
+      function recurse(node, item) {
+        let child;
+        if (Array.isArray(item)) {
+  	child = item.reduce(recurse, document.createDocumentFragment());
+        } else if (item.nodeType) {
+  	child = item;
         } else {
-  	ch = document.createTextNode(c);
+  	child = document.createTextNode(item);
         }
-        acc.appendChild(ch);
-        return acc;
+        node.appendChild(child);
+        return node;
       }
   
       function Title(attr, str) {
@@ -202,3 +210,35 @@ In an empty directory:
 | Firefox 54 | ✅ |
 | Safari 10  | ✅ |
 | Chrome 59  | ✅ |
+
+* An =el= function with better ergonomics
+
+#+NAME: define-el
+#+BEGIN_SRC js
+  function el(node, ...args) {
+    let attributes;
+    let children;
+  
+    if (args.length < 1) { return h(node, null); }
+    let a = args.shift();
+    let b = args;
+  
+    if (a == null) {
+      attributes = null;
+      children = b;
+    } else if (a.nodeType
+  	     || typeof a === 'string'
+  	     || typeof a === 'number'
+  	     || typeof a === 'boolean') {
+      attributes = null;
+      children = [a, ...b];
+    } else if (Array.isArray(a)) {
+      attributes = null;
+      children = a;
+    } else {
+      attributes = a;
+      children = b;
+    }
+    return h(node, attributes, ...children);
+  }
+#+END_SRC

@@ -9,33 +9,34 @@
         return node(attributes, ...children);
       }
     
-      let elm;
+      let element;
+    
       if (typeof node === 'string') {
-        elm = document.createElement(node);
-      } else if (node.nodeType) {
-        elm = node;
+        element = document.createElement(node);
+      } else if (typeof node.appendChild === 'function') {
+        element = node;
       } else {
-        throw new TypeError('Unknown node type');
+        throw new TypeError('node must be a String or an object that implements appendChild');
       }
     
-      if (Boolean(attributes)) {
-        Object.keys(attributes).forEach(k => elm.setAttribute(k, attributes[k]));
+      if (attributes) {
+        Object.keys(attributes).forEach(k => k === '$' ? Object.assign(element, attributes.$) : element.setAttribute(k, attributes[k]));
       }
     
-      return children.reduce(rec, elm);
+      return children == null ? element : children.reduce(recurse, element);
     }
     
-    function rec(acc, c) {
-      let ch;
-      if (Array.isArray(c)) {
-        ch = c.reduce(rec, document.createDocumentFragment());
-      } else if (c.nodeType) {
-        ch = c;
+    function recurse(node, item) {
+      let child;
+      if (Array.isArray(item)) {
+        child = item.reduce(recurse, document.createDocumentFragment());
+      } else if (item.nodeType) {
+        child = item;
       } else {
-        ch = document.createTextNode(c);
+        child = document.createTextNode(item);
       }
-      acc.appendChild(ch);
-      return acc;
+      node.appendChild(child);
+      return node;
     }
     
     function Title(attr, str) {
