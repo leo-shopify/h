@@ -1,7 +1,2 @@
-/lib/
-/node_modules/
-/src/
-
-/.babelrc
-/package-lock.json
-/package.json
+/OLD
+/.esm-cache/

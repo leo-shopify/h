@@ -1,0 +1,232 @@
+{
+  "name": "@leo-shopify/h",
+  "version": "1.0.0-alpha.0",
+  "description": "Lightweight DOM element creation based on a subset of the hyperscript API and compatible with JSX.",
+  "keywords": [],
+  "author": "leo-shopify <leonardo.rojas@shopify.com>",
+  "license": "MIT",
+  "repository": "https://github.com/leo-shopify/h",
+  "bugs": "https://github.com/leo-shopify/h/issues",
+  "main": "cjs/index.js",
+  "module": "esm/index.js",
+  "browser": "browser/index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "@std/esm": "^0.5.1",
+    "babel-cli": "^6.26.0",
+    "babel-plugin-transform-react-jsx": "^6.24.1",
+    "babel-preset-env": "^1.6.0",
+    "chai": "^4.1.1",
+    "eslint": "^4.5.0",
+    "eslint-plugin-compat": "^1.0.4",
+    "eslint-plugin-shopify": "^17.0.0",
+    "mocha": "^3.5.0",
+    "npm-run-all": "^4.0.2",
+    "rimraf": "^2.6.1",
+    "rollup": "^0.48.2",
+    "uglify-es": "^3.0.28"
+  },
+  "scripts": {
+    "test": "mocha --require @std/esm",
+    "eslint": "eslint esm/ test/",
+    "esfix": "eslint --fix esm/ test/",
+    "clean": "rimraf cjs/* browser/*",
+    "roll:cjs": "rollup esm/index.js --output.format cjs --output.file cjs/index.js",
+    "roll:browser": "rollup esm/index.js --output.format iife --output.file browser/index.js --output.name h --sourcemap",
+    "transp:browser": "babel browser/index.js --out-file browser/index.js --source-maps --input-source-map browser/index.js.map",
+    "minify:browser": "uglifyjs browser/index.js --output browser/index.min.js --compress --mangle --source-map content=browser/index.js.map",
+    "build:browser": "run-s roll:browser transp:browser minify:browser",
+    "build": "run-p clean eslint test roll:cjs build:browser"
+  },
+  "babel": {
+    "plugins": [
+      "transform-react-jsx"
+    ],
+    "presets": [
+      [
+        "env",
+        {
+          "exclude": [
+            "transform-es2015-typeof-symbol"
+          ]
+        }
+      ]
+    ]
+  },
+  "@std/esm": {
+    "esm": "js"
+  },
+  "eslintConfig": {
+    "extends": "plugin:shopify/esnext",
+    "plugins": [
+      "compat"
+    ],
+    "parserOptions": {
+      "ecmaFeatures": {
+        "jsx": true
+      }
+    },
+    "env": {
+      "es6": false,
+      "browser": true
+    },
+    "rules": {
+      "compat/compat": "error",
+      "no-restricted-properties": [
+        "error",
+        {
+          "object": "Object",
+          "property": "assign"
+        },
+        {
+          "object": "Object",
+          "property": "is"
+        },
+        {
+          "object": "Object",
+          "property": "setPrototypeOf"
+        },
+        {
+          "object": "Array",
+          "property": "from"
+        },
+        {
+          "object": "Array",
+          "property": "of"
+        },
+        {
+          "object": "String",
+          "property": "fromCodePoint"
+        },
+        {
+          "object": "String",
+          "property": "raw"
+        },
+        {
+          "object": "Number",
+          "property": "isFinite"
+        },
+        {
+          "object": "Number",
+          "property": "isNaN"
+        },
+        {
+          "object": "Number",
+          "property": "isInteger"
+        },
+        {
+          "object": "Number",
+          "property": "isSafeInteger"
+        },
+        {
+          "object": "Number",
+          "property": "parseFloat"
+        },
+        {
+          "object": "Number",
+          "property": "parseInt"
+        },
+        {
+          "object": "Number",
+          "property": "EPSILON"
+        },
+        {
+          "object": "Number",
+          "property": "MAX_SAFE_INTEGER"
+        },
+        {
+          "object": "Number",
+          "property": "MIN_SAFE_INTEGER"
+        },
+        {
+          "object": "Math",
+          "property": "acosh"
+        },
+        {
+          "object": "Math",
+          "property": "asinh"
+        },
+        {
+          "object": "Math",
+          "property": "atanh"
+        },
+        {
+          "object": "Math",
+          "property": "cbrt"
+        },
+        {
+          "object": "Math",
+          "property": "clz32"
+        },
+        {
+          "object": "Math",
+          "property": "cosh"
+        },
+        {
+          "object": "Math",
+          "property": "expm1"
+        },
+        {
+          "object": "Math",
+          "property": "fround"
+        },
+        {
+          "object": "Math",
+          "property": "hypot"
+        },
+        {
+          "object": "Math",
+          "property": "imul"
+        },
+        {
+          "object": "Math",
+          "property": "log1p"
+        },
+        {
+          "object": "Math",
+          "property": "log10"
+        },
+        {
+          "object": "Math",
+          "property": "log2"
+        },
+        {
+          "object": "Math",
+          "property": "sign"
+        },
+        {
+          "object": "Math",
+          "property": "sinh"
+        },
+        {
+          "object": "Math",
+          "property": "tanh"
+        },
+        {
+          "object": "Math",
+          "property": "trunc"
+        }
+      ],
+      "id-length": [
+        "warn",
+        {
+          "min": 2,
+          "properties": "always",
+          "exceptions": [
+            "h",
+            "i",
+            "j"
+          ]
+        }
+      ]
+    }
+  },
+  "browserslist": [
+    "Last 2 versions",
+    "> 1%",
+    "Android >= 4",
+    "iOS >= 9",
+    "Safari >= 9",
+    "IE >= 9"
+  ]
+}
