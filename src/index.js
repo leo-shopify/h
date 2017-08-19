@@ -12,6 +12,7 @@
  */
 function isFunction(it) { return typeof it === 'function'; }
 
+
 /**
  * Creates or updates DOM elements.
  * @public
@@ -19,57 +20,73 @@ function isFunction(it) { return typeof it === 'function'; }
  * @param {string|HTMLElement|function} tag
  * @param {Object.<string>} [attributes]
  * @param {Array.<HTMLElement|string>|DocumentFragment} [children]
- * @return HTMLElement
+ * @return function
  */
-export function html(tag, attributes, children) {
-  if (isFunction(tag)) {
-    return tag(attributes, children);
-  }
-
-  const doc = document;
-  let element;
-
-  if (typeof tag === 'string') {
-    element = doc.createElement(tag);
-  } else if (isFunction(tag.appendChild)) {
-    element = tag;
-  } else {
-    throw new TypeError('tag must be string, HTMLElement or function');
-  }
-
-  for (const key in attributes) {
-    if (attributes.hasOwnProperty(key)) {
-      const attribute = attributes[key];
-      if (key === '$') {
-        for (const key2 in attribute) {
-          if (attribute.hasOwnProperty(key2)) { element[key2] = attribute[key2]; }
-        }
-      } else {
-        element[attribute == null ? 'removeAttribute' : 'setAttribute'](key, attribute);
-      }
+export function makeHtml(doc) {
+  /**
+   * Creates or updates DOM elements.
+   * @function
+   * @param {string|HTMLElement|function} tag
+   * @param {Object.<string>} [attributes]
+   * @param {Array.<HTMLElement|string>|DocumentFragment} [children]
+   * @return HTMLElement
+   */
+  return function html(tag, attributes, children) {
+    if (isFunction(tag)) {
+      return tag(attributes, children);
     }
-  }
 
-  if (children != null) {
-    let child;
-    if (Array.isArray(children)) {
-      child = doc.createDocumentFragment();
-      const len = children.length;
-      for (let i = 0, item; i < len; i += 1) {
-        item = children[i];
-        if (item == null) { continue; }
-        child.appendChild(item.nodeType ? item : doc.createTextNode(item));
-      }
-    } else if (children.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
-      child = children;
+    const doc = document;
+    let element;
+
+    if (typeof tag === 'string') {
+      element = doc.createElement(tag);
+    } else if (isFunction(tag.appendChild)) {
+      element = tag;
     } else {
-      throw new TypeError('children must be an Array or a DocumentFragment');
+      throw new TypeError('tag must be string, HTMLElement or function');
     }
-    element.appendChild(child);
-  }
 
-  return element;
+    for (const key in attributes) {
+      if (attributes.hasOwnProperty(key)) {
+        const attribute = attributes[key];
+        if (key === '$') {
+          for (const key2 in attribute) {
+            if (attribute.hasOwnProperty(key2)) { element[key2] = attribute[key2]; }
+          }
+        } else {
+          element[attribute == null ? 'removeAttribute' : 'setAttribute'](key, attribute);
+        }
+      }
+    }
+
+    if (children != null) {
+      let child;
+      if (Array.isArray(children)) {
+        child = doc.createDocumentFragment();
+        const len = children.length;
+        for (let i = 0, item; i < len; i += 1) {
+          item = children[i];
+          if (item == null) { continue; }
+          child.appendChild(item.nodeType ? item : doc.createTextNode(item));
+        }
+      } else if (children.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
+        child = children;
+      } else {
+        throw new TypeError('children must be an Array or a DocumentFragment');
+      }
+      element.appendChild(child);
+    }
+
+    return element;
+  };
 }
+
+
+/**
+ * Convenience export of `html` with `Document` defined.
+ */
+export const html = makeHtml(document);
 
 
 /**
