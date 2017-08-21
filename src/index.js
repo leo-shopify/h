@@ -28,26 +28,6 @@ function isAttributes(it) {
 
 
 /**
- * Add children the element. Skip `null` and `undefined`. Recurse on `Array`.
- * If the item has a `nodeType` key, assume it is an HTMLElement or
- * DocumentFragment and add it. Otherwise convert it to a `Text` node.
- * @param {DocumentLike} doc Object implementing the DOM `Document` interface.
- * @param {HTMLElementLike} element The parent element.
- * @param {[*]} children The children.
- * @return {HTMLElementLike} The modified parent element.
- */
-function addChildren(doc, element, children) {
-  for (let i = 0, len = children.length, item; i < len; i += 1) {
-    item = children[i];
-    if (item == null) { continue; } // eslint-disable-line no-eq-null, no-continue
-    if (Array.isArray(item)) { addChildren(doc, element, item); }
-    element.appendChild(item.nodeType ? item : doc.createTextNode(item));
-  }
-  return element;
-}
-
-
-/**
  * @type {function}
  */
 const toArray = Array.prototype.slice;
@@ -90,6 +70,22 @@ const toArray = Array.prototype.slice;
  * @return {function} `h` closed over `doc`.
  */
 export function make(doc) {
+
+  /**
+   * Add the child to the element. Skip `null` and `undefined`. Recurse on
+   * `Array`.  If the item has a `nodeType` key, assume it is an HTMLElement or
+   * DocumentFragment and add it. Otherwise convert it to a `Text` node.
+   * @param {HTMLElementLike} element The parent element.
+   * @param {*} item The object to be appended as a child of element.
+   * @return {HTMLElementLike} The modified parent element.
+   */
+  function addChildren(element, item) {
+    if (item == null) { return element; } // eslint-disable-line no-eq-null, no-continue
+    if (Array.isArray(item)) { return item.reduce(addChildren, element); }
+    element.appendChild(item.nodeType ? item : doc.createTextNode(item));
+    return element;
+  }
+
 
   /**
    * Creates or modifies DOM elements.
@@ -173,7 +169,7 @@ export function make(doc) {
      * The remaining elements of `rest` are the children. Add them to the
      * element.
      */
-    return addChildren(doc, element, rest);
+    return rest.reduce(addChildren, element);
   };
 }
 
