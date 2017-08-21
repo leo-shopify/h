@@ -12,29 +12,18 @@ const objToStr = Object.prototype.toString;
 
 
 /**
- * @type {number}
- */
-const DOCUMENT_FRAGMENT_NODE = 11;
-
-
-/**
  * Tests if a value qualifies as an `attributes` object.  Valid `attributes`
  * are: `null`, `Map`, `WeakMap` and plain `Object`.  If the value is `Object`
- * and it has a `nodeType` key, and the value of the key is a `number` then it
- * has to be larger than 11.
+ * it cannot contain a `nodeType` key.
  * @param {*} it The value to test.
  * @return {boolean} `true` if it is an `attributes` object.
  */
 function isAttributes(it) {
-  if (it === null) { return true; }
-  if (!it) { return false; }
   const str = objToStr.call(it).substr(8); // eslint-disable-line no-magic-numbers
-  if (str === 'Object]') {
-    const val = it.nodeType;
-    if (typeof val === 'number') { return val > DOCUMENT_FRAGMENT_NODE; }
-    return true;
-  }
-  return str === 'Map]' || str === 'WeakMap]';
+  return it === null ||
+    (str === 'Object]' && !('nodeType' in it)) ||
+    str === 'Map]' ||
+    str === 'WeakMap]';
 }
 
 
@@ -45,15 +34,16 @@ function isAttributes(it) {
  * @param {DocumentLike} doc Object implementing the DOM `Document` interface.
  * @param {HTMLElementLike} element The parent element.
  * @param {[*]} children The children.
- * @return {undefined} The parent element is modified in place.
+ * @return {HTMLElementLike} The modified parent element.
  */
 function addChildren(doc, element, children) {
-  for (let i = children.length, child1 = element.firstChild, item; i--;) {
+  for (let i = 0, len = children.length, item; i < len; i += 1) {
     item = children[i];
     if (item == null) { continue; } // eslint-disable-line no-eq-null, no-continue
     if (Array.isArray(item)) { addChildren(doc, element, item); }
-    element.insertBefore(item.nodeType ? item : doc.createTextNode(item), child1);
+    element.appendChild(item.nodeType ? item : doc.createTextNode(item));
   }
+  return element;
 }
 
 
@@ -130,34 +120,31 @@ export function make(doc) {
      * Ensure `tag` is defined.
      */
     tag = tag || 'div'; // eslint-disable-line no-param-reassign
-    let element;
 
     /**
      * Create the element.
      *
-     * If type `string` -> create a new element.
      * If `tag.nodeType` is 1 -> assume it is an existing element.
+     * Else coerce to `string` and create a new element.
      */
-    if (typeof tag === 'string') {
-      element = doc.createElement(tag);
-    } else if (tag.nodeType && tag.nodeType === 1) {
+    let element;
+
+    if (tag.nodeType && tag.nodeType === 1) {
       element = tag;
     } else {
-      throw new TypeError('tag must be a string, an HTMLElement or a function');
+      element = doc.createElement(String(tag));
     }
 
     /**
      * Add the attributes.
      *
-     * If the first element from the arguments is an `attributes` value, remove
-     * it from the array.
-     *
-     * The remaining elements of the array are necessarily the children.
+     * If the first element from the arguments is an `attributes` value, copy it
+     * and set the original to undefined which is skipped by the children
+     * processor. This is faster than `Array.shift()`.
      */
     if (isAttributes(rest[0])) {
-      // const attributes = rest.shift();
       const attributes = rest[0];
-      rest[0] = null;
+      rest[0] = undefined;
 
       /**
        * Iterate over the attributes keys.
@@ -165,35 +152,28 @@ export function make(doc) {
        * If the value of the key is `undefined` or `null` remove the attribute
        * from the element. Otherwise add it.
        */
-      const attrKeys = Object.keys(attributes);
-      for (let i = attrKeys.length, attrKey, attrVal; i--;) {
-        attrKey = attrKeys[i];
-        attrVal = attributes[attrKey];
+      Object.keys(attributes).forEach(attrKey => {
+        const attrVal = attributes[attrKey];
 
         /**
          * If the special key `$` is found, use it to populate the element's
          * properties.
          */
         if (attrKey === '$') {
-          const propKeys = Object.keys(attrVal);
-          for (let j = propKeys.length, propKey; j--;) {
-            propKey = propKeys[j];
-            element[propKey] = attrVal[propKey];
-          }
+          Object.keys(attrVal).forEach(propKey => { element[propKey] = attrVal[propKey]; });
         } else if (attrVal == null) { // eslint-disable-line no-eq-null
           element.removeAttribute(attrKey);
         } else {
           element.setAttribute(attrKey, attrVal);
         }
-      }
+      });
     }
 
     /**
-     * Add the children.
+     * The remaining elements of `rest` are the children. Add them to the
+     * element.
      */
-    addChildren(doc, element, rest);
-
-    return element;
+    return addChildren(doc, element, rest);
   };
 }
 
