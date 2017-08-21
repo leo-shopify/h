@@ -1,0 +1,44 @@
+{
+  "name": "@leo-shopify/h",
+  "version": "1.0.0-alpha.0",
+  "description": "Lightweight DOM element creation. Compatible with hyperscript and JSX",
+  "keywords": [],
+  "author": "leo-shopify <leonardo.rojas@shopify.com>",
+  "license": "MIT",
+  "repository": "https://github.com/leo-shopify/h",
+  "bugs": "https://github.com/leo-shopify/h/issues",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-plugin-transform-react-jsx": "^6.24.1",
+    "eslint": "^4.5.0",
+    "eslint-plugin-shopify": "^17.0.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "babel src -d lib"
+  },
+  "eslintConfig": {
+    "extends": "plugin:shopify/esnext",
+    "parserOptions": {
+      "ecmaFeatures": {
+        "jsx": true
+      }
+    },
+    "rules": {
+      "id-length": [
+        "warn",
+        {
+          "min": 2,
+          "properties": "always",
+          "exceptions": [
+            "h",
+            "i",
+            "j"
+          ]
+        }
+      ]
+    }
+  }
+}

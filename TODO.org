@@ -1,0 +1,27 @@
+* Checklist for a release [0/4]
+
+- [ ] Documentation [0/6]
+  - [ ] Description, motivation, references, limitations
+  - [ ] Installation
+  - [ ] Usage
+  - [ ] Examples [0/2]
+    - [ ] Standard
+    - [ ] JSX
+  - [ ] API
+  - [ ] Badges
+
+- [ ] Correctness [0/3]
+  - [ ] Tests
+  - [ ] Test coverage
+  - [ ] Typescript
+
+- [ ] Publishing [0/4]
+  - [ ] =main=, =module= and =browser= [[package.json]] fields
+  - [ ] Build and publish automation scripts
+  - [ ] [[http://keepachangelog.com/en/1.0.0/][Changelog]]
+  - [ ] CI
+
+- [ ] Collaboration [0/3]
+  - [ ] Eslint rules
+  - [ ] [[https://help.github.com/articles/setting-guidelines-for-repository-contributors/][Contributing]], [[https://help.github.com/articles/adding-support-resources-to-your-project/][support]], [[https://help.github.com/articles/helping-people-contribute-to-your-project/#creating-an-issue-template-for-your-repository][Issue]] and PR templates (see [[https://eslint.org/docs/developer-guide/contributing/pull-requests][eslint's]])
+  - [ ] Add [[https://help.github.com/articles/about-codeowners/][codeowners]]

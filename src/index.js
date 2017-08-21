@@ -140,7 +140,7 @@ export function make(doc) {
      */
     if (isAttributes(rest[0])) {
       const attributes = rest[0];
-      rest[0] = undefined;
+      delete rest[0];
 
       /**
        * Iterate over the attributes keys.
@@ -148,7 +148,7 @@ export function make(doc) {
        * If the value of the key is `undefined` or `null` remove the attribute
        * from the element. Otherwise add it.
        */
-      Object.keys(attributes).forEach(attrKey => {
+      Object.keys(attributes).forEach((attrKey) => {
         const attrVal = attributes[attrKey];
 
         /**
@@ -156,7 +156,7 @@ export function make(doc) {
          * properties.
          */
         if (attrKey === '$') {
-          Object.keys(attrVal).forEach(propKey => { element[propKey] = attrVal[propKey]; });
+          Object.keys(attrVal).forEach((propKey) => { element[propKey] = attrVal[propKey]; });
         } else if (attrVal == null) { // eslint-disable-line no-eq-null
           element.removeAttribute(attrKey);
         } else {
