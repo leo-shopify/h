@@ -84,7 +84,7 @@ export default function make(doc) {
    * @return {HTMLElementLike} The modified parent element.
    */
   function addChildren(element, item) {
-    if (item == null) { return element; } // eslint-disable-line no-eq-null, no-continue
+    if (item == null) { return element; } // eslint-disable-line no-eq-null
     if (Array.isArray(item)) { return item.reduce(addChildren, element); }
     element.appendChild(item.nodeType ? item : doc.createTextNode(item));
     return element;
