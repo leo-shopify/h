@@ -139,12 +139,12 @@ export default function make(doc) {
      * Add the attributes.
      *
      * If the first element from the arguments is an `attributes` value, copy it
-     * and set the original to undefined which is skipped by the children
+     * and set the original to null which is skipped by the children
      * processor. This is faster than `Array.shift()`.
      */
     if (isAttributes(rest[0])) {
       const attributes = rest[0];
-      delete rest[0];
+      rest[0] = null;
 
       /**
        * Iterate over the attributes keys.
