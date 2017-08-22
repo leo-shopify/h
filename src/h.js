@@ -96,35 +96,36 @@ export default function make(doc) {
    * @param {string | HTMLElementLike | function} [tag='div'] Either a string
    * representing the type of the element to create, an existing element to
    * modify, or a function to delegate the construction. Defaults to `'div'` if
-   * absent.
-   * @param {...*} [rest] Optional attributes and children.
+   * falsy.
+   * @param {object | null} [attributes=null] Optional attributes object.
+   * @param {...*} [children] Optional children.
    * @return {HTMLElementLike} Resulting DOM element.
    */
-  return function h(tag /* ...rest */) {
+  return function h(/* ...args */) {
 
     /**
      * Convert the `arguments` object to a real array skipping the first
      * argument.
      * @type {array}
      */
-    const rest = toArray.call(arguments, 1); // eslint-disable-line prefer-rest-params
+    const args = toArray.call(arguments, 1); // eslint-disable-line prefer-rest-params
+
+    /**
+     * Ensure `tag` is defined.
+     */
+    const tag = arguments[0] || DEFAULT_TAG; // eslint-disable-line prefer-rest-params
 
     /**
      * If `tag` is a function delegate and bail early.
      */
     if (typeof tag === 'function') {
-      return tag.apply(null, rest); // eslint-disable-line prefer-spread
+      return tag.apply(null, args); // eslint-disable-line prefer-spread
     }
-
-    /**
-     * Ensure `tag` is defined.
-     */
-    tag = tag || DEFAULT_TAG; // eslint-disable-line no-param-reassign
 
     /**
      * Create the element.
      *
-     * If `tag.nodeType` is 1 -> assume it is an existing element.
+     * If `tag.nodeType` is 1 assume it is an existing element.
      * Else coerce to `string` and create a new element.
      */
     let element;
@@ -132,7 +133,8 @@ export default function make(doc) {
     if (tag.nodeType && tag.nodeType === 1) {
       element = tag;
     } else {
-      element = doc.createElement(String(tag) || DEFAULT_TAG);
+      // eslint-disable-next-line no-implicit-coercion, prefer-template
+      element = doc.createElement(tag + '' || DEFAULT_TAG);
     }
 
     /**
@@ -142,9 +144,9 @@ export default function make(doc) {
      * and set the original to null which is skipped by the children
      * processor. This is faster than `Array.shift()`.
      */
-    if (isAttributes(rest[0])) {
-      const attributes = rest[0];
-      rest[0] = null;
+    if (isAttributes(args[0])) {
+      const attributes = args[0];
+      args[0] = null;
 
       /**
        * Iterate over the attributes keys.
@@ -173,6 +175,6 @@ export default function make(doc) {
      * The remaining elements of `rest` are the children. Add them to the
      * element.
      */
-    return rest.reduce(addChildren, element);
+    return args.reduce(addChildren, element);
   };
 }
