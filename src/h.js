@@ -154,7 +154,7 @@ export default function make(doc) {
        * If the value of the key is `undefined` or `null` remove the attribute
        * from the element. Otherwise add it.
        */
-      Object.keys(attributes).forEach((attrKey) => {
+      for (const attrKey in attributes) { // eslint-disable-line guard-for-in
         const attrVal = attributes[attrKey];
 
         /**
@@ -162,13 +162,14 @@ export default function make(doc) {
          * properties.
          */
         if (attrKey === '$') {
-          Object.keys(attrVal).forEach((propKey) => { element[propKey] = attrVal[propKey]; });
+          // eslint-disable-next-line guard-for-in
+          for (const propKey in attrVal) { element[propKey] = attrVal[propKey]; }
         } else if (attrVal == null) { // eslint-disable-line no-eq-null
           element.removeAttribute(attrKey);
         } else {
           element.setAttribute(attrKey, attrVal);
         }
-      });
+      }
     }
 
     /**
