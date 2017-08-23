@@ -63,6 +63,13 @@ const toArray = Array.prototype.slice;
  * @prop {array} [children]
  */
 
+
+/**
+ * @type {string}
+ */
+const FUNCTION = 'function';
+
+
 /**
  * @type {string}
  */
@@ -118,7 +125,7 @@ export default function make(doc) {
     /**
      * If `tag` is a function delegate and bail early.
      */
-    if (typeof tag === 'function') {
+    if (typeof tag === FUNCTION) {
       return tag.apply(null, args); // eslint-disable-line prefer-spread
     }
 
@@ -151,6 +158,8 @@ export default function make(doc) {
       /**
        * Iterate over the attributes keys.
        *
+       * If the value of the key is `function` set it as a property.
+       *
        * If the value of the key is `undefined` or `null` remove the attribute
        * from the element. Otherwise add it.
        */
@@ -164,6 +173,8 @@ export default function make(doc) {
         if (attrKey === '$') {
           // eslint-disable-next-line guard-for-in
           for (const propKey in attrVal) { element[propKey] = attrVal[propKey]; }
+        } else if (typeof attrVal === FUNCTION) {
+          element[attrKey] = attrVal;
         } else if (attrVal == null) { // eslint-disable-line no-eq-null
           element.removeAttribute(attrKey);
         } else {
