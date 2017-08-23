@@ -76,7 +76,7 @@ export default function make(doc) {
    * @return {HTMLElementLike} The modified parent element.
    */
   function addChildren(element, item) {
-    if (item == null) { return element; } // eslint-disable-line no-eq-null
+    if (item == null) { return element; }
     if (Array.isArray(item)) { return item.reduce(addChildren, element); }
     element.appendChild(item.nodeType ? item : doc.createTextNode(item));
     return element;
@@ -172,7 +172,7 @@ export default function make(doc) {
           for (const propKey in attrVal) { element[propKey] = attrVal[propKey]; }
         } else if (typeof attrVal === FUNCTION) {
           element[attrKey] = attrVal;
-        } else if (attrVal == null) { // eslint-disable-line no-eq-null
+        } else if (attrVal == null) {
           element.removeAttribute(attrKey);
         } else {
           element.setAttribute(attrKey, attrVal);
