@@ -12,22 +12,6 @@ const objToStr = Object.prototype.toString;
 
 
 /**
- * Tests if a value qualifies as an `attributes` object.  Valid `attributes`
- * are: `null`, `Map`, `WeakMap` and plain `Object`.  If the value is `Object`
- * it cannot contain a `nodeType` key.
- * @param {*} it The value to test.
- * @return {boolean} `true` if it is an `attributes` object.
- */
-function isAttributes(it) {
-  const str = objToStr.call(it).substr(8); // eslint-disable-line no-magic-numbers
-  return it === null ||
-    (str === 'Object]' && !('nodeType' in it)) ||
-    str === 'Map]' ||
-    str === 'WeakMap]';
-}
-
-
-/**
  * @type {function}
  */
 const toArray = Array.prototype.slice;
@@ -151,8 +135,12 @@ export default function make(doc) {
      * and set the original to null which is skipped by the children
      * processor. This is faster than `Array.shift()`.
      */
-    if (isAttributes(args[0])) {
-      const attributes = args[0];
+    const first = args[0];
+    const asStr = objToStr.call(first).substr(8); // eslint-disable-line no-magic-numbers
+    if (first === null ||
+        (asStr === 'Object]' && !('nodeType' in first)) ||
+        asStr === 'Map]' ||
+        asStr === 'WeakMap]') {
       args[0] = null;
 
       /**
