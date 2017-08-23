@@ -15,6 +15,7 @@
     "babel-plugin-transform-react-jsx": "^6.24.1",
     "chai": "^4.1.1",
     "eslint": "^4.5.0",
+    "eslint-plugin-compat": "^1.0.4",
     "eslint-plugin-shopify": "^17.0.0",
     "mocha": "^3.5.0"
   },
@@ -29,15 +30,60 @@
   },
   "eslintConfig": {
     "extends": "plugin:shopify/esnext",
+    "plugins": [
+      "compat"
+    ],
     "parserOptions": {
       "ecmaFeatures": {
         "jsx": true
       }
     },
     "env": {
-      "es6": false
+      "es6": false,
+      "browser": true
     },
     "rules": {
+      "compat/compat": "error",
+      "no-restricted-properties": [
+        "error",
+        {"object": "Object", "property": "assign"},
+        {"object": "Object", "property": "is"},
+        {"object": "Object", "property": "setPrototypeOf"},
+
+        {"object": "Array", "property": "from"},
+        {"object": "Array", "property": "of"},
+
+        {"object": "String", "property": "fromCodePoint"},
+        {"object": "String", "property": "raw"},
+
+        {"object": "Number", "property": "isFinite"},
+        {"object": "Number", "property": "isNaN"},
+        {"object": "Number", "property": "isInteger"},
+        {"object": "Number", "property": "isSafeInteger"},
+        {"object": "Number", "property": "parseFloat"},
+        {"object": "Number", "property": "parseInt"},
+        {"object": "Number", "property": "EPSILON"},
+        {"object": "Number", "property": "MAX_SAFE_INTEGER"},
+        {"object": "Number", "property": "MIN_SAFE_INTEGER"},
+
+        {"object": "Math", "property": "acosh"},
+        {"object": "Math", "property": "asinh"},
+        {"object": "Math", "property": "atanh"},
+        {"object": "Math", "property": "cbrt"},
+        {"object": "Math", "property": "clz32"},
+        {"object": "Math", "property": "cosh"},
+        {"object": "Math", "property": "expm1"},
+        {"object": "Math", "property": "fround"},
+        {"object": "Math", "property": "hypot"},
+        {"object": "Math", "property": "imul"},
+        {"object": "Math", "property": "log1p"},
+        {"object": "Math", "property": "log10"},
+        {"object": "Math", "property": "log2"},
+        {"object": "Math", "property": "sign"},
+        {"object": "Math", "property": "sinh"},
+        {"object": "Math", "property": "tanh"},
+        {"object": "Math", "property": "trunc"}
+      ],
       "id-length": [
         "warn",
         {
@@ -51,5 +97,13 @@
         }
       ]
     }
-  }
+  },
+  "browserslist": [
+    "Last 2 versions",
+    "> 1%",
+    "Android >= 4",
+    "iOS >= 9",
+    "Safari >= 9",
+    "IE >= 9"
+  ]
 }
