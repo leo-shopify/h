@@ -25,6 +25,9 @@
     "esfix": "eslint --fix src/ test/",
     "build": "babel src -d lib"
   },
+  "babel": {
+    "plugins": ["transform-react-jsx"]
+  },
   "@std/esm": {
     "esm": "js"
   },
