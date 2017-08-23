@@ -1,6 +1,6 @@
 /**
  * Lightweight DOM element creation based on a subset of the hyperscript API and
- * compatible JSX.
+ * compatible with JSX.
  * @module
  * @author leo-shopify <leonardo.rojas@shopify.com>
  */

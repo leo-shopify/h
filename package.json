@@ -1,7 +1,7 @@
 {
   "name": "@leo-shopify/h",
   "version": "1.0.0-alpha.0",
-  "description": "Lightweight DOM element creation based on a subset of the hyperscript API and compatible JSX.",
+  "description": "Lightweight DOM element creation based on a subset of the hyperscript API and compatible with JSX.",
   "keywords": [],
   "author": "leo-shopify <leonardo.rojas@shopify.com>",
   "license": "MIT",
