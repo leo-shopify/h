@@ -1,3 +1,21 @@
+# `h`
+
+Lightweight DOM element creation based on a subset of the hyperscript API and
+compatible JSX.
+
+```js
+import h from '@leo-shopify/h';
+
+var element = h('section',
+                h('h1', {'class': 'hero'}, 'What are you doing?'),
+                h('p', {$: {style: {color: 'grey'}}},
+                  "I'm taking a ride ",
+                  'with my best friend.'));
+
+document.body.appendChild(element);
+```
+
+
 # jsx without react
 
 Even if react is not used in a project you can still take advantage of [jsx](https://babeljs.io/docs/plugins/transform-react-jsx/)

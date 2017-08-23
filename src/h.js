@@ -1,5 +1,6 @@
 /**
- * Convenience DOM creation and manipulation function compatible with JSX.
+ * Lightweight DOM element creation based on a subset of the hyperscript API and
+ * compatible JSX.
  * @module
  * @author leo-shopify <leonardo.rojas@shopify.com>
  */
