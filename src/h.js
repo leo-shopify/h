@@ -50,9 +50,7 @@ const toArray = Array.prototype.slice;
 
 
 /**
- * @type {string}
  */
-const FUNCTION = 'function';
 
 
 /**
@@ -110,7 +108,7 @@ export default function make(doc) {
     /**
      * If `tag` is a function delegate and bail early.
      */
-    if (typeof tag === FUNCTION) {
+    if (typeof tag === 'function') {
       return tag.apply(null, args); // eslint-disable-line prefer-spread
     }
 
