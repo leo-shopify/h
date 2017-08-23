@@ -50,7 +50,23 @@ const toArray = Array.prototype.slice;
 
 
 /**
+ * Recursively copy an object.
+ * @param {object} to The destination.
+ * @param {object} from The source.
+ * @return {undefined} Copies in-place.
  */
+function deepCopy(to, from) {
+  for (const prop in from) {
+    if (from.hasOwnProperty(prop)) {
+      if (typeof from[prop] === 'object' && from[prop] != null) {
+        to[prop] = to[prop] || {};
+        deepCopy(to[prop], from[prop]);
+      } else {
+        to[prop] = from[prop];
+      }
+    }
+  }
+}
 
 
 /**
@@ -166,10 +182,7 @@ export default function make(doc) {
          * from the element. Otherwise add it.
          */
         if (attrKey === '$') {
-          // eslint-disable-next-line guard-for-in
-          for (const propKey in attrVal) { element[propKey] = attrVal[propKey]; }
-        } else if (typeof attrVal === FUNCTION) {
-          element[attrKey] = attrVal;
+          deepCopy(element, attrVal);
         } else if (attrVal == null) {
           element.removeAttribute(attrKey);
         } else {
