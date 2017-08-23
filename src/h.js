@@ -131,9 +131,10 @@ export default function make(doc) {
     /**
      * Add the attributes.
      *
-     * If the first element from the arguments is an `attributes` value, copy it
-     * and set the original to null which is skipped by the children
-     * processor. This is faster than `Array.shift()`.
+     *
+     * A value qualifies as an `attributes` object if it is: `null`, `Map`,
+     * `WeakMap` and plain `Object`.  If the value is `Object` it cannot contain
+     * a `nodeType` key.
      */
     const first = args[0];
     const asStr = objToStr.call(first).substr(8); // eslint-disable-line no-magic-numbers
@@ -141,15 +142,17 @@ export default function make(doc) {
         (asStr === 'Object]' && !('nodeType' in first)) ||
         asStr === 'Map]' ||
         asStr === 'WeakMap]') {
+
+      /**
+       * If the first element from the arguments is an `attributes` value, copy
+       * it and set the original to null which is skipped by the children
+       * processor. This is faster than `Array.shift()`.
+       */
+      const attributes = first;
       args[0] = null;
 
       /**
        * Iterate over the attributes keys.
-       *
-       * If the value of the key is `function` set it as a property.
-       *
-       * If the value of the key is `undefined` or `null` remove the attribute
-       * from the element. Otherwise add it.
        */
       for (const attrKey in attributes) { // eslint-disable-line guard-for-in
         const attrVal = attributes[attrKey];
@@ -157,6 +160,11 @@ export default function make(doc) {
         /**
          * If the special key `$` is found, use it to populate the element's
          * properties.
+         *
+         * If the value of the key is `function` set it as a property.
+         *
+         * If the value of the key is `undefined` or `null` remove the attribute
+         * from the element. Otherwise add it.
          */
         if (attrKey === '$') {
           // eslint-disable-next-line guard-for-in
