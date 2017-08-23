@@ -15,9 +15,10 @@
   - [ ] Test coverage
   - [ ] Typescript
 
-- [-] Publishing [1/4]
-  - [ ] =main=, =module= and =browser= [[package.json]] fields
-  - [ ] Build and publish automation scripts
+- [-] Publishing [3/5]
+  - [X] =main=, =module= and =browser= [[package.json]] fields
+  - [X] Build scripts
+  - [ ] Publish automation scripts
   - [X] [[http://keepachangelog.com/en/1.0.0/][Changelog]]
   - [ ] CI
 

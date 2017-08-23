@@ -1,6 +1,6 @@
 import mocha from 'mocha';
 import chai from 'chai';
-import make from '../src/h';
+import make from '../esm/h';
 
 const {describe, it} = mocha;
 const {assert} = chai;
