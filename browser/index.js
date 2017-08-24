@@ -154,8 +154,7 @@ var h = function () {
        * a `nodeType` key.
        */
       var first = args[0];
-      var asStr = objToStr.call(first).substr(8); // eslint-disable-line no-magic-numbers
-      if (first === null || asStr === 'Object]' && !('nodeType' in first) || asStr === 'Map]' || asStr === 'WeakMap]') {
+      if (first === null || objToStr.call(first) === '[object Object]' && !('nodeType' in first)) {
 
         /**
          * If the first element from the arguments is an `attributes` value, copy

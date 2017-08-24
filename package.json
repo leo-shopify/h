@@ -17,26 +17,39 @@
     "babel-plugin-transform-react-jsx": "^6.24.1",
     "babel-preset-env": "^1.6.0",
     "chai": "^4.1.1",
+    "easy-sauce": "^0.4.1",
     "eslint": "^4.5.0",
     "eslint-plugin-compat": "^1.0.4",
     "eslint-plugin-shopify": "^17.0.0",
+    "karma": "^1.7.0",
+    "karma-chai": "^0.1.0",
+    "karma-chrome-launcher": "^2.2.0",
+    "karma-firefox-launcher": "^1.0.1",
+    "karma-mocha": "^1.3.0",
+    "karma-rollup-preprocessor": "^5.0.1",
     "mocha": "^3.5.0",
     "npm-run-all": "^4.0.2",
     "rimraf": "^2.6.1",
     "rollup": "^0.48.2",
-    "uglify-es": "^3.0.28"
+    "uglify-js": "^3.0.28"
   },
   "scripts": {
-    "test": "mocha --require @std/esm",
+    "clean": "rimraf cjs/* browser/* docs/*",
+    "browser-tests:roll": "rollup test/index.js --output.format iife --output.file docs/index.js --output.name test",
+    "browser-tests:trans": "babel docs/index.js --out-file docs/index.js --source-maps inline",
+    "browser-tests:cp": "cp test/index.html docs/",
+    "pretest": "npm-run-all browser-tests:roll browser-tests:trans --parallel browser-tests:cp",
+    "test": "easy-sauce",
+    "test:local": "karma start test/karma.conf.js",
     "eslint": "eslint esm/ test/",
     "esfix": "eslint --fix esm/ test/",
-    "clean": "rimraf cjs/* browser/*",
     "roll:cjs": "rollup esm/index.js --output.format cjs --output.file cjs/index.js",
     "roll:browser": "rollup esm/index.js --output.format iife --output.file browser/index.js --output.name h --sourcemap",
-    "transp:browser": "babel browser/index.js --out-file browser/index.js --source-maps --input-source-map browser/index.js.map",
-    "minify:browser": "uglifyjs browser/index.js --output browser/index.min.js --compress --mangle --source-map content=browser/index.js.map",
-    "build:browser": "run-s roll:browser transp:browser minify:browser",
-    "build": "run-p clean eslint test roll:cjs build:browser"
+    "trans:browser": "babel browser/index.js --out-file browser/index.js --source-maps --input-source-map browser/index.js.map",
+    "minify:browser": "uglifyjs browser/index.js --output browser/index.min.js --compress --mangle --source-map content=browser/index.js.map  --source-map filename=browser/index.min.js.map",
+    "build:browser": "run-s roll:browser trans:browser minify:browser",
+    "prebuild": "run-s clean",
+    "build": "run-p eslint test roll:cjs build:browser"
   },
   "babel": {
     "plugins": [
@@ -215,7 +228,8 @@
           "exceptions": [
             "h",
             "i",
-            "j"
+            "j",
+            "$"
           ]
         }
       ]
@@ -228,5 +242,83 @@
     "iOS >= 9",
     "Safari >= 9",
     "IE >= 9"
-  ]
+  ],
+  "easySauce": {
+    "name": "leo-shopify/h",
+    "testPath": "/docs/index.html",
+    "port": "1337",
+    "framework": "mocha",
+    "platforms": [
+      [
+        "Windows 7",
+        "internet explorer",
+        "9.0"
+      ],
+      [
+        "Windows 8",
+        "internet explorer",
+        "10.0"
+      ],
+      [
+        "Windows 10",
+        "internet explorer",
+        "11.103"
+      ],
+      [
+        "Windows 10",
+        "MicrosoftEdge",
+        "latest"
+      ],
+      [
+        "Windows 10",
+        "MicrosoftEdge",
+        "latest-1"
+      ],
+      [
+        "Windows 10",
+        "MicrosoftEdge",
+        "latest-2"
+      ],
+      [
+        "Windows 10",
+        "firefox",
+        "latest"
+      ],
+      [
+        "Windows 10",
+        "firefox",
+        "latest-1"
+      ],
+      [
+        "Windows 10",
+        "firefox",
+        "latest-2"
+      ],
+      [
+        "Windows 10",
+        "chrome",
+        "latest"
+      ],
+      [
+        "Windows 10",
+        "chrome",
+        "latest-1"
+      ],
+      [
+        "Windows 10",
+        "chrome",
+        "latest-2"
+      ],
+      [
+        "OS X 10.11",
+        "safari",
+        "9.0"
+      ],
+      [
+        "OS X 10.11",
+        "safari",
+        "10.0"
+      ]
+    ]
+  }
 }

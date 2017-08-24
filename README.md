@@ -1,5 +1,4 @@
-[![GitHub tag](https://img.shields.io/github/tag/leo-shopify/h.svg)](https://github.com/leo-shopify/h)
-[![David](https://img.shields.io/david/dev/leo-shopify/h.svg)](https://github.com/leo-shopify/h)
+[![Build Status](https://saucelabs.com/browser-matrix/leo-shopify.svg)](https://saucelabs.com/beta/builds/2b5885d9312d410c96f53c225074efb9)
 
 # `h`
 
@@ -73,6 +72,11 @@ var h = require('@leo-shopify/h');
 ```
 
 
+### API
+
+See the [API page](https://leo-shopify.github.io/h/).
+
+
 ## jsx
 
 Even if you are not using react you can still take advantage of *jsx* syntax by
@@ -131,3 +135,8 @@ plugin or [Bublé](https://buble.surge.sh/guide/#jsx.).
 4.  Compile the script to standard JavaScript:
 
         ./node_modules/.bin/babel sample.js
+
+
+## Run the tests on your device
+
+Visit the [test page](https://leo-shopify.github.io/h/).
