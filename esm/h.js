@@ -59,7 +59,9 @@ function deepCopy(to, from) {
   for (const prop in from) {
     if (from.hasOwnProperty(prop)) {
       if (typeof from[prop] === 'object' && from[prop] != null) {
-        to[prop] = to[prop] || {};
+        if (typeof to[prop] !== 'object' || to[prop] == null) {
+          to[prop] = {};
+        }
         deepCopy(to[prop], from[prop]);
       } else {
         to[prop] = from[prop];
