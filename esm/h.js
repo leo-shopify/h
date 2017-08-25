@@ -152,11 +152,8 @@ export default function make(doc) {
      * a `nodeType` key.
      */
     const first = args[0];
-    const asStr = objToStr.call(first).substr(8); // eslint-disable-line no-magic-numbers
     if (first === null ||
-        (asStr === 'Object]' && !('nodeType' in first)) ||
-        asStr === 'Map]' ||
-        asStr === 'WeakMap]') {
+        (objToStr.call(first) === '[object Object]' && !('nodeType' in first))) {
 
       /**
        * If the first element from the arguments is an `attributes` value, copy

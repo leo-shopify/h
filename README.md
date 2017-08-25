@@ -21,19 +21,19 @@ document.body.appendChild(element);
 
 ## Features
 
-- DOM *HTMLElement*s can be passed as a first argument or as children, enabling
+- DOM *HTMLElement*s can be passed as a first argument and as children, enabling
   the modification of existing elements.
 
 - Compatible with [jsx](#jsx). The first argument of `h` can be a *function*
   that accepts the rest of the arguments, enabling *react-style components*.
   
 - Explicit distinction between DOM *attributes* and *properties*.  
-  The optional second argument can be a plain JavaScript *Object*, a *Map*, or a
-  *WeakMap*. Its members are added to the *HTMLElement* as attributes (or
-  removed if the value is `null` or `undefined`).  
-  If a member with a `$` key is included its values are recursively copied to the
-  *HTMLElement* as properties, allowing `style` properties as objects, *event
-  properties* and giving explicit control to the programmer.
+  When the optional second argument is a plain JavaScript *Object* its members
+  are added to the *HTMLElement* as attributes (or removed if the value is
+  `null` or `undefined`).  
+  If a member with a `$` key is included its values are recursively copied to
+  the *HTMLElement* as properties, allowing `style` properties as objects,
+  *event properties* and giving explicit control to the programmer.
   
 - Lightweight. Less than `1kb` minified. No dependencies.
 
@@ -42,7 +42,7 @@ document.body.appendChild(element);
 
 ## Non-features and caveats
 
-- The shorthand syntax for *classes* and *id*s using *css selectors* has been
+- The shorthand syntax for *class*es and *id*s using *css selectors* has been
   omitted.
   
 - JavaScript objects with a `nodeType` property are considered DOM *Node*s.
